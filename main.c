@@ -6,7 +6,7 @@
 #define MAX_LENGTH 256
 
 typedef struct proc {
-    char *name;
+    char name[MAX_LENGTH];
     int priority;
     int pid;
     int runtime;
@@ -23,6 +23,7 @@ struct node *push(proc_t *process);
 struct proc *pop();
 struct proc *delete_by_name(char *name);
 struct proc *delete_by_pid(int pid);
+bool is_head(struct node *n);
 void display_process(const struct proc * pro);
 
 int main(int argc, char **argv)
@@ -33,7 +34,6 @@ int main(int argc, char **argv)
         // printf("%s\n", buffer);
         char *token = strtok(buffer, ",");
         proc_t *pro = (struct proc *) malloc(sizeof(struct proc));
-        pro->name = (char *) malloc(MAX_LENGTH * sizeof(char) + 1);
         int i = 0;
         while (token != NULL && i >= 0 && i < 4) {
             if (i == 0) {
@@ -53,7 +53,27 @@ int main(int argc, char **argv)
         push(pro);
     }
 
-    // display_process(pop());
+//    printf("Pop first pushed element\n");
+//    proc_t *pop1 = pop();
+//    display_process(pop1);
+//    free(pop1);
+//
+//    printf("Remove node by process name\n");
+//    proc_t *del1 = delete_by_name("processA");
+//    display_process(del1);
+//    free(del1);
+//
+//    printf("Remove node by process name\n");
+//    proc_t *del2 = delete_by_name("processE");
+//    if (del2 != NULL) {
+//        display_process(del2);
+//        free(del2);
+//    }
+//
+//    printf("Remove node by process name\n");
+//    proc_t *del3 = delete_by_name("vscode");
+//    display_process(del3);
+//    free(del3);
 
     node_t *curr_node = head;
     int i = 0;
@@ -62,6 +82,13 @@ int main(int argc, char **argv)
         display_process(curr_node->process);
         curr_node = curr_node->next;
         i++;
+    }
+
+    printf("Remove each process from queue by using pop\n");
+    proc_t *p;
+    while ((p = pop()) != NULL) {
+        display_process(p);
+        free(p);
     }
 
     return 0;
@@ -84,7 +111,7 @@ struct node *push(proc_t *process)
             return NULL;
         head->process = process;
         head->next = NULL;
-        return;
+        return head;
     }
     node_t *tmp_node = head;
     while (tmp_node && tmp_node->next) {
@@ -102,28 +129,59 @@ struct proc *pop() {
         return NULL;
     
     if (head && !head->next) {
-        node_t *n = head;
+        proc_t *pro = (struct proc *) malloc(sizeof(struct proc));
+        memcpy(pro, head->process, sizeof(struct proc));
+        free(head->process);
+        free(head);
         head = NULL;
-        return n->process;
+        return pro;
     }
 
-    node_t *tmp_node = head;
+
+    proc_t *pro = (struct proc *) malloc(sizeof(struct proc));
+    memcpy(pro, head->process, sizeof(struct proc));
+    node_t *tmp = head;
     head = head->next;
-    return tmp_node->process;
+    free(tmp->process);
+    free(tmp);
+    return pro;
 }
 
 struct proc *delete_by_name(char *name) {
     node_t *curr_node = head;
-    bool found = false;
     node_t *prev_node = NULL;
-    while(curr_node && !found) {
-        if (strcmp(curr_node->process->name, name) == 0)
+    bool found = false;
+    while(curr_node) {
+        if (strcmp(curr_node->process->name, name) == 0) {
             found = true;
+            break;
+        }
         prev_node = curr_node;
         curr_node = curr_node->next;
     }
-
     if (!found) {
         return NULL;
     }
 
+    proc_t *pro = (struct proc *) malloc(sizeof(struct proc));
+    memcpy(pro, curr_node->process, sizeof(struct proc));
+    node_t *next_node = curr_node->next;
+    if (prev_node == NULL) {
+        head = next_node;
+    } else {
+        prev_node->next = next_node;
+    }
+    free(curr_node->process);
+    free(curr_node);
+    return pro;
+
+
+}
+
+bool is_head(struct node *n) {
+    if (n == NULL || head == NULL)
+        return false;
+    if (n == head)
+        return true;
+    return false;
+}
