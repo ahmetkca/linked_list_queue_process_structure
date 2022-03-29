@@ -1,0 +1,10 @@
+emacs,1,10156,100
+vscode,4,4589,60
+firefox,3,12560,45
+chrome,9,6489,75
+edge,2,499,120
+processA,8,7562,88
+processB,7,55,44
+processC,11,3345,33
+processD,12,8222,15
+processE,99,11,29
