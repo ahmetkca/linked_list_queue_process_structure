@@ -1,5 +1,5 @@
 all:
-	gcc -Wall -g3 -fsanitize=address -o main main.c
+	gcc -g -Wall -o main main.c
 
 clean:
 	rm -f main

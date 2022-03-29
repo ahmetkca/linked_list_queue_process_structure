@@ -23,7 +23,6 @@ struct node *push(proc_t *process);
 struct proc *pop();
 struct proc *delete_by_name(char *name);
 struct proc *delete_by_pid(int pid);
-bool is_head(struct node *n);
 void display_process(const struct proc * pro);
 
 int main(int argc, char **argv)
@@ -52,29 +51,9 @@ int main(int argc, char **argv)
         memset(&buffer[0], 0, sizeof(buffer));
         push(pro);
     }
+    fclose(fd);
 
-//    printf("Pop first pushed element\n");
-//    proc_t *pop1 = pop();
-//    display_process(pop1);
-//    free(pop1);
-//
-//    printf("Remove node by process name\n");
-//    proc_t *del1 = delete_by_name("processA");
-//    display_process(del1);
-//    free(del1);
-//
-//    printf("Remove node by process name\n");
-//    proc_t *del2 = delete_by_name("processE");
-//    if (del2 != NULL) {
-//        display_process(del2);
-//        free(del2);
-//    }
-//
-//    printf("Remove node by process name\n");
-//    proc_t *del3 = delete_by_name("vscode");
-//    display_process(del3);
-//    free(del3);
-
+    printf("Before deleting any process from queue\n");
     node_t *curr_node = head;
     int i = 0;
     while (curr_node) {
@@ -83,12 +62,25 @@ int main(int argc, char **argv)
         curr_node = curr_node->next;
         i++;
     }
+    
+    proc_t *del_emacs = delete_by_name("emacs");
+    printf("Delete the process named \"emacs\"\n");
+    display_process(del_emacs);
+    free(del_emacs);
 
-    printf("Remove each process from queue by using pop\n");
+    proc_t *del_pid = delete_by_pid(12235);
+    printf("Delete the process with the pid 12235\n");
+    display_process(del_pid);
+    free(del_pid);
+
+    printf("Remove rest of the processes from queue by using pop\n");
     proc_t *p;
+    int x = 0;
     while ((p = pop()) != NULL) {
+        printf("Popped process #%d\n", x);
         display_process(p);
         free(p);
+        x++;
     }
 
     return 0;
@@ -174,14 +166,33 @@ struct proc *delete_by_name(char *name) {
     free(curr_node->process);
     free(curr_node);
     return pro;
-
-
 }
 
-bool is_head(struct node *n) {
-    if (n == NULL || head == NULL)
-        return false;
-    if (n == head)
-        return true;
-    return false;
+struct proc *delete_by_pid(int pid) {
+    node_t *curr_node = head;
+    node_t *prev_node = NULL;
+    bool found = false;
+    while(curr_node) {
+        if (curr_node->process->pid == pid) {
+            found = true;
+            break;
+        }
+        prev_node = curr_node;
+        curr_node = curr_node->next;
+    }
+    if (!found) {
+        return NULL;
+    }
+
+    proc_t *pro = (struct proc *) malloc(sizeof(struct proc));
+    memcpy(pro, curr_node->process, sizeof(struct proc));
+    node_t *next_node = curr_node->next;
+    if (prev_node == NULL) {
+        head = next_node;
+    } else {
+        prev_node->next = next_node;
+    }
+    free(curr_node->process);
+    free(curr_node);
+    return pro;
 }
